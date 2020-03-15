@@ -1,0 +1,30 @@
+version: '3'
+volumes: 
+    packages:
+    db:
+networks: 
+    api:
+services: 
+    app:
+        image: golang:1.13.6-alpine 
+        volumes: 
+            - .:/src
+            - packages:/go
+        working_dir: /src 
+        command: sh init.sh
+        ports: 
+            - 8083:8080
+        depends_on: 
+            - database
+        networks: 
+            - api
+        environment: 
+            - MONGODB_URL=database:27017
+            - STATIC_URL=http://localhost:8083/static/
+    database:
+        image: mongo:3.6-xenial 
+        restart: always 
+        networks: 
+            - api
+        volumes: 
+            - db:/data/db
