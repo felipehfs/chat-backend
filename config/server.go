@@ -5,6 +5,7 @@ import (
 
 	"github.com/felipehfs/api/chat/controllers"
 	"github.com/felipehfs/api/chat/repositories"
+	"github.com/felipehfs/api/chat/services"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"gopkg.in/mgo.v2"
@@ -25,11 +26,17 @@ func NewServer(db *mgo.Session, route *mux.Router) *Server {
 func (s *Server) Run(port string) {
 
 	userDao := repositories.NewUserDAO(s.DB)
+	chat, err := services.NewChat()
+	if err != nil {
+		panic(err)
+	}
 
 	userHandler := controllers.NewUserHandler(userDao)
 	s.Route.Handle("/register", http.HandlerFunc(userHandler.Register)).Methods("POST")
 	s.Route.Handle("/login", http.HandlerFunc(userHandler.Login)).Methods("POST")
 	s.Route.Handle("/users/{id}/avatar", http.HandlerFunc(userHandler.UpdateAvatar)).Methods("PUT")
+	s.Route.Handle("/chat", chat)
+
 	dir := "/src/statics"
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
