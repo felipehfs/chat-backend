@@ -108,9 +108,6 @@ func (handler UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	result, err := handler.Dao.Login(user)
 
-	if result.AvatarURL != "" {
-		result.AvatarURL = os.Getenv("STATIC_URL") + result.AvatarURL
-	}
 	if err != nil {
 
 		if err == mgo.ErrNotFound {
@@ -120,6 +117,10 @@ func (handler UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	if result.AvatarURL != "" {
+		result.AvatarURL = os.Getenv("STATIC_URL") + result.AvatarURL
 	}
 
 	result.Password = ""
